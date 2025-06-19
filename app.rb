@@ -6,26 +6,6 @@ require 'json'
 
 MEMO_FILE = 'memos.json'
 
-helpers do
-  include ERB::Util
-
-  def find_memo(memos = nil)
-    id = params[:id].to_i
-    memos ||= load_memos
-    memo = memos.find { |memo| memo[:id] == id }
-    halt 404, 'メモが見つかりません' unless memo
-    memo
-  end
-
-  def load_memos
-    JSON.parse(File.read(MEMO_FILE), symbolize_names: true)
-  end
-
-  def save_memos(memos)
-    File.write(MEMO_FILE, JSON.pretty_generate(memos))
-  end
-end
-
 get '/' do
   redirect '/memos'
 end
@@ -87,4 +67,24 @@ end
 not_found do
   status 404
   '404 Not Found'
+end
+
+helpers do
+  include ERB::Util
+
+  def find_memo(memos = nil)
+    id = params[:id].to_i
+    memos ||= load_memos
+    memo = memos.find { |memo| memo[:id] == id }
+    halt 404, 'メモが見つかりません' unless memo
+    memo
+  end
+
+  def load_memos
+    JSON.parse(File.read(MEMO_FILE), symbolize_names: true)
+  end
+
+  def save_memos(memos)
+    File.write(MEMO_FILE, JSON.pretty_generate(memos))
+  end
 end
