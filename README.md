@@ -45,7 +45,7 @@
 
 4. アプリケーションを起動
 
-   `ruby app.rb`
+   `bundle exec ruby app.rb`
 
 5. ブラウザでアクセス
 
