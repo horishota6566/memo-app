@@ -1,0 +1,17 @@
+<header>
+  <h1>メモアプリ</h1>
+</header>
+
+<main>
+  <h2><%= escape_html(@memo[:title]) %></h2>
+  <p><%= escape_html(@memo[:content]).gsub("\n", "<br />") %></p>
+
+  <form action="/memos/<%= @memo[:id] %>/edit" method="get">
+    <button>変更</button>
+  </form>
+
+  <form action="/memos/<%= @memo[:id] %>" method="post">
+    <input type="hidden" name="_method" value="delete" />
+    <button>削除</button>
+  </form>
+</main>
