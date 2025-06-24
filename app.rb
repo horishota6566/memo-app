@@ -81,6 +81,7 @@ helpers do
   end
 
   def load_memos
+    return [] if !File.exist?(MEMO_FILE) || File.zero?(MEMO_FILE)
     JSON.parse(File.read(MEMO_FILE), symbolize_names: true)
   end
 
