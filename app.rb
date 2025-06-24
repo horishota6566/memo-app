@@ -36,7 +36,7 @@ end
 post '/memos' do
   halt 400, 'タイトルが必要です' if params[:title].strip.empty?
   memos = load_memos
-  new_id = (memos.map { |memo| memo[:id] }.max || 0) + 1
+  new_id = (memos.map { it[:id] }.max || 0) + 1
   new_memo = {
     id: new_id,
     title: params[:title],
@@ -59,7 +59,7 @@ end
 delete '/memos/:id' do
   memos = load_memos
   id = params[:id].to_i
-  memos.reject! { |memo| memo[:id] == id }
+  memos.reject! { it[:id] == id }
   save_memos(memos)
   redirect '/memos'
 end
@@ -75,7 +75,7 @@ helpers do
   def find_memo(memos = nil)
     id = params[:id].to_i
     memos ||= load_memos
-    memo = memos.find { |memo| memo[:id] == id }
+    memo = memos.find { it[:id] == id }
     halt 404, 'メモが見つかりません' unless memo
     memo
   end
