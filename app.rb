@@ -85,6 +85,6 @@ helpers do
   end
 
   def save_memos(memos)
-    File.write(MEMO_FILE, JSON.pretty_generate(memos))
+    File.write(MEMO_FILE, JSON.generate(memos))
   end
 end
