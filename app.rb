@@ -22,13 +22,15 @@ get '/memos/new' do
 end
 
 get '/memos/:id' do
-  @memo = find_memo
+  memos = load_memos
+  @memo = find_memo(memos)
   @title = "Memo: #{@memo[:title]}"
   erb :show
 end
 
 get '/memos/:id/edit' do
-  @memo = find_memo
+  memos = load_memos
+  @memo = find_memo(memos)
   @title = 'Edit Memo'
   erb :edit
 end
@@ -72,9 +74,8 @@ end
 helpers do
   include ERB::Util
 
-  def find_memo(memos = nil)
+  def find_memo(memos)
     id = params[:id].to_i
-    memos ||= load_memos
     memo = memos.find { it[:id] == id }
     halt 404, 'メモが見つかりません' unless memo
     memo
