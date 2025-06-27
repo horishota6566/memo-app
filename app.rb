@@ -2,23 +2,20 @@
 
 require 'sinatra'
 require 'sinatra/reloader'
-require 'json'
-
-MEMO_FILE = 'memos.json'
+require 'pg'
 
 get '/' do
   redirect '/memos'
 end
 
 get '/memos' do
-  @memos = load_memos
+  @memos = read_all
   @title = 'All Memos'
   erb :index
 end
 
-get '/memos/:id' do
-  memos = load_memos
-  @memo = find_memo(memos)
+get %r{/memos/(\d+)} do |id|
+  @memo = read(id)
   @title = "Memo: #{@memo[:title]}"
   erb :show
 end
@@ -28,41 +25,25 @@ get '/memos/new' do
   erb :new
 end
 
-get '/memos/:id/edit' do
-  memos = load_memos
-  @memo = find_memo(memos)
+get '/memos/:id/edit' do |id|
+  @memo = read(id)
   @title = 'Edit Memo'
   erb :edit
 end
 
 post '/memos' do
   halt 400, 'タイトルが必要です' if params[:title].strip.empty?
-  memos = load_memos
-  new_id = (memos.map { it[:id] }.max || 0) + 1
-  new_memo = {
-    id: new_id,
-    title: params[:title],
-    content: params[:content].gsub(/\r\n?/, "\n")
-  }
-  memos << new_memo
-  save_memos(memos)
-  redirect "/memos/#{new_id}"
-end
-
-patch '/memos/:id' do
-  memos = load_memos
-  memo = find_memo(memos)
-  memo[:title] = params[:title]
-  memo[:content] = params[:content].gsub(/\r\n?/, "\n")
-  save_memos(memos)
+  memo = create(params)
   redirect "/memos/#{memo[:id]}"
 end
 
-delete '/memos/:id' do
-  memos = load_memos
-  id = params[:id].to_i
-  memos.reject! { it[:id] == id }
-  save_memos(memos)
+patch '/memos/:id' do
+  memo = update(params)
+  redirect "/memos/#{memo[:id]}"
+end
+
+delete '/memos/:id' do |id|
+  delete(id)
   redirect '/memos'
 end
 
@@ -74,20 +55,46 @@ end
 helpers do
   include ERB::Util
 
-  def find_memo(memos)
-    id = params[:id].to_i
-    memo = memos.find { it[:id] == id }
-    halt 404, 'メモが見つかりません' unless memo
-    memo
+  def read_all
+    connection = PG.connect(dbname: 'memo-app')
+    result = connection.exec('SELECT * FROM memos;')
+    result.map { |row| row.transform_keys(&:to_sym) }
+    ensure connection.close
   end
 
-  def load_memos
-    return [] if !File.exist?(MEMO_FILE) || File.zero?(MEMO_FILE)
-
-    JSON.parse(File.read(MEMO_FILE), symbolize_names: true)
+  def read(id)
+    connection = PG.connect(dbname: 'memo-app')
+    result = connection.exec_params('SELECT * FROM memos WHERE id = $1;', [id])
+    result.first.transform_keys(&:to_sym)
+    ensure connection.close
   end
 
-  def save_memos(memos)
-    File.write(MEMO_FILE, JSON.generate(memos))
+  def create(params)
+    connection = PG.connect(dbname: 'memo-app')
+    result = connection.exec_params(
+      'INSERT INTO memos (title, content) VALUES ($1, $2) RETURNING *',
+      [params[:title], params[:content]]
+    )
+    result.first.transform_keys(&:to_sym)
+    ensure connection.close
+  end
+
+  def update(params)
+    connection = PG.connect(dbname: 'memo-app')
+    result = connection.exec_params(
+      'UPDATE memos
+      SET title = $1, content = $2
+      WHERE id = $3
+      RETURNING *;',
+      [params[:title], params[:content], params[:id]]
+    )
+    result.first.transform_keys(&:to_sym)
+    ensure connection.close
+  end
+
+  def delete(id)
+    connection = PG.connect(dbname: 'memo-app')
+    connection.exec_params('DELETE FROM memos WHERE id = $1;', [id])
+    ensure connection.close
   end
 end
