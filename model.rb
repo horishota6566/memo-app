@@ -1,12 +1,16 @@
 # frozen_string_literal: true
 
 require 'pg'
+require 'connection_pool'
+
+DB_POOL = ConnectionPool.new(size: 5, timeout: 5) do
+  PG.connect(dbname: 'memo-app')
+end
 
 def with_connection
-  connection = PG.connect(dbname: 'memo-app')
-  yield(connection)
-ensure
-  connection.close
+  DB_POOL.with do |connection|
+    yield connection
+  end
 end
 
 def read_all
