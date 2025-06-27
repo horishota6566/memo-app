@@ -16,16 +16,16 @@ get '/memos' do
   erb :index
 end
 
-get '/memos/new' do
-  @title = 'Add Memo'
-  erb :new
-end
-
 get '/memos/:id' do
   memos = load_memos
   @memo = find_memo(memos)
   @title = "Memo: #{@memo[:title]}"
   erb :show
+end
+
+get '/memos/new' do
+  @title = 'Add Memo'
+  erb :new
 end
 
 get '/memos/:id/edit' do
