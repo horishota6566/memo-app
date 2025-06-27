@@ -6,6 +6,7 @@ gem 'puma'
 gem 'rackup'
 gem 'sinatra'
 gem 'pg'
+gem 'connection_pool'
 
 group :development do
   gem 'erb_lint', require: false
