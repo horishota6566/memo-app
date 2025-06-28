@@ -7,10 +7,8 @@ DB_POOL = ConnectionPool.new(size: 5, timeout: 5) do
   PG.connect(dbname: 'memo-app')
 end
 
-def with_connection
-  DB_POOL.with do |connection|
-    yield connection
-  end
+def with_connection(&block)
+  DB_POOL.with(&block)
 end
 
 def read_all
@@ -52,7 +50,7 @@ end
 
 def delete(id)
   with_connection do |connection|
-    result = connection.exec_params(
+    connection.exec_params(
       'DELETE FROM memos WHERE id = $1;',
       [id]
     )
