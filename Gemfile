@@ -2,6 +2,8 @@
 
 source 'https://rubygems.org'
 
+gem 'connection_pool'
+gem 'pg'
 gem 'puma'
 gem 'rackup'
 gem 'sinatra'

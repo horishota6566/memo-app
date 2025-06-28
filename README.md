@@ -2,19 +2,20 @@
 
 ## 概要
 
-このアプリは、Sinatra と JSON ファイルを用いて作成したシンプルなメモアプリです。
-ブラウザ上でメモの作成・編集・削除ができ、データはローカルの JSON ファイルに保存されます。
+このアプリは、Sinatra と PostgreSQL を使用して作成したシンプルなメモアプリです。
+ブラウザ上でメモの作成・編集・削除ができ、データはローカルの PostgreSQL に保存されます。
 学習目的での軽量な CRUD アプリケーションです。
 
 ## 前提条件
 
-- **Ruby** と **Bundler** がインストールされていること
+- **Ruby** と **Bundler** と**PostgreSQL**がインストールされていること
 
   バージョン確認コマンド：
 
   ```sh
   ruby -v
   bundler -v
+  psql -V
   ```
 
   ※ インストール手順は 公式サイト を参照してください。
@@ -43,10 +44,27 @@
 
    `bundle install`
 
-4. アプリケーションを起動
+4. データベースを作成し接続
+
+   ```
+   createdb memo-app
+   psql memo-app
+   ```
+
+5. テーブルを作成
+
+   ```
+   CREATE TABLE memos (
+   id SERIAL PRIMARY KEY,
+   title TEXT NOT NULL,
+   content TEXT
+   );
+   ```
+
+6. アプリケーションを起動
 
    `bundle exec ruby app.rb`
 
-5. ブラウザでアクセス
+7. ブラウザでアクセス
 
    `http://localhost:4567`
